@@ -1,64 +1,20 @@
-## .NET Core / .NET 5+ / .NET 9
+# Build results
 bin/
 obj/
-out/
+
+# User-specific files
 *.user
 *.suo
-*.userosscache
-*.sln.docstates
-*.log
-*.vspscc
-*.vssscc
-*.dbmdl
-*.dbproj.schemaview
-*.pdb
-*.cache
-*.ide
-*.sln.ide
 
-# Rider
-.idea/
-*.sln.iml
-
-# Visual Studio
-.vs/
+# Visual Studio Code
 .vscode/
-*.csproj.user
-*.csproj.nuget.g.props
-*.csproj.nuget.g.targets
 
 # NuGet
 *.nupkg
-.nuget/
-packages/
 *.snupkg
-
-# Build results
-build/
 project.lock.json
-project.fragment.lock.json
-
-# Entity Framework
-migrations/
-
-# Test results
-TestResults/
-*.trx
-*.coverage
-*.coveragexml
+project.nuget.cache
 
 # Others
+*.log
 *.DS_Store
-*.env
-*.swp
-*.bak
-*.tmp
-*.orig
-*.rej
-
-# OS-specific
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-*.lnk
