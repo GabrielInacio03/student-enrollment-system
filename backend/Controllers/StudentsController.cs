@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using backend.Data.Repositories.Interfaces;
+using backend.DTOs.Aluno;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,12 +50,42 @@ namespace backend.Controllers
         /// <param name="student"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult> Create(Student student)
+        public async Task<ActionResult> Create(StudentCreateDTO studentDTO)
         {
+            if (!ModelState.IsValid)
+            {
+                var erros = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(new { Erros = erros });
+            }
+            
+            if (_repo.GetByRAAsync(studentDTO.RA).Result != null)
+            {
+                return BadRequest(new { Erros = new[] { "RA já cadastrado. Use outro número." } });
+            }
+            var student = new Student
+            {
+                Name = studentDTO.Name,
+                Email = studentDTO.Email,
+                RA = studentDTO.RA,
+                CPF = studentDTO.CPF
+            };
             await _repo.AddAsync(student);
-            var success = await _repo.SaveChangesAsync();
-            if (!success) return BadRequest("Erro ao salvar.");
-            return CreatedAtAction(nameof(GetById), new { id = student.Id }, student);
+            await _repo.SaveChangesAsync();
+            var response = new StudentResponseDTO
+            {
+                Name = student.Name,
+                Email = student.Email,
+                RA = student.RA,
+                CPF = student.CPF
+            };
+
+        return Ok(new { Mensagem = "Aluno cadastrado com sucesso!", Aluno = response });
+
+
         }
 
         /// <summary>
@@ -64,20 +95,32 @@ namespace backend.Controllers
         /// <param name="updatedStudent"></param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, Student updatedStudent)
+        public async Task<ActionResult> Update(int id, [FromBody] StudentUpdateDTO dto)
         {
-            var student = await _repo.GetByIdAsync(id);
-            if (student == null) return NotFound();
+            if (!ModelState.IsValid)
+            {
+                var erros = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
 
-            student.Name = updatedStudent.Name;
-            student.Email = updatedStudent.Email;
-            student.RA = updatedStudent.RA;
-            student.CPF = updatedStudent.CPF;
+                return BadRequest(new { Erros = erros });
+            }
+
+            var student = await _repo.GetByIdAsync(id);
+            if (student == null)
+                return NotFound(new { Erros = new[] { "Aluno não encontrado." } });
+
+            student.Name = dto.Name;
+            student.Email = dto.Email;
 
             await _repo.UpdateAsync(student);
             var success = await _repo.SaveChangesAsync();
-            if (!success) return BadRequest("Erro ao atualizar.");
-            return NoContent();
+
+            if (!success)
+                return BadRequest(new { Erros = new[] { "Erro ao atualizar o cadastro." } });
+
+            return Ok(new { Mensagem = "Cadastro atualizado com sucesso!" });
         }
 
         /// <summary>
@@ -89,14 +132,21 @@ namespace backend.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             var student = await _repo.GetByIdAsync(id);
-            if (student == null) return NotFound();
+            if (student == null)
+            {
+                return NotFound(new { Erros = new[] { "Aluno não encontrado." } });
+            }
 
             await _repo.DeleteAsync(student);
             var success = await _repo.SaveChangesAsync();
-            if (!success) return BadRequest("Erro ao deletar.");
-            return NoContent();
-        }
 
+            if (!success)
+            {
+                return BadRequest(new { Erros = new[] { "Erro ao excluir o cadastro do aluno." } });
+            }
+
+            return Ok(new { Mensagem = "Aluno excluído com sucesso!" });
+        }
 
     }
 }
