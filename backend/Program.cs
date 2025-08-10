@@ -1,4 +1,6 @@
 using backend.Data;
+using backend.Data.Repositories.Implementations;
+using backend.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 36))
     )
 );
+
+//repositorios
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
