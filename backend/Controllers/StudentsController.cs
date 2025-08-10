@@ -8,37 +8,64 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class StudentsController : ControllerBase
     {
         private readonly IStudentRepository _repo;
 
-        public StudentsController(IStudentRepository repo) {
+        public StudentsController(IStudentRepository repo)
+        {
             _repo = repo;
         }
-
-[HttpGet]
-        public async Task<ActionResult<IEnumerable<Student>>> GetAll() {
+        
+        /// <summary>
+        /// Retorna todos os alunos cadastrados
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Student>>> GetAll()
+        {
             var students = await _repo.GetAllAsync();
             return Ok(students);
         }
 
+        /// <summary>
+        /// Retorna um aluno específico pelo ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Student>> GetById(int id) {
+        public async Task<ActionResult<Student>> GetById(int id)
+        {
             var student = await _repo.GetByIdAsync(id);
             if (student == null) return NotFound();
             return Ok(student);
         }
 
+        /// <summary>
+        /// Cria um novo estudante
+        /// </summary>
+        /// <param name="student"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult> Create(Student student) {
+        public async Task<ActionResult> Create(Student student)
+        {
             await _repo.AddAsync(student);
             var success = await _repo.SaveChangesAsync();
             if (!success) return BadRequest("Erro ao salvar.");
             return CreatedAtAction(nameof(GetById), new { id = student.Id }, student);
         }
 
+        /// <summary>
+        /// Atualiza os dados de um estudante
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updatedStudent"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, Student updatedStudent) {
+        public async Task<ActionResult> Update(int id, Student updatedStudent)
+        {
             var student = await _repo.GetByIdAsync(id);
             if (student == null) return NotFound();
 
@@ -53,8 +80,14 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Exclui um estudando pelo ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id) {
+        public async Task<ActionResult> Delete(int id)
+        {
             var student = await _repo.GetByIdAsync(id);
             if (student == null) return NotFound();
 
