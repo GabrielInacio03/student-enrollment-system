@@ -1,3 +1,4 @@
+using System.Reflection;
 using backend.Data;
 using backend.Data.Repositories.Implementations;
 using backend.Data.Repositories.Interfaces;
@@ -19,8 +20,15 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
+});
 
 var app = builder.Build();
+
 
 app.UseSwagger();
 app.UseSwaggerUI();
