@@ -12,6 +12,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 36))
     )
 );
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVueApp",
+        policy => policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
+
+
 
 //repositorios
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
@@ -32,6 +42,8 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors("AllowVueApp");
+
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
