@@ -8,6 +8,12 @@ export async function getAllStudents(): Promise<Student[]> {
   console.log("response: ", response)
   return response.data
 }
+export async function getStudentsPaged(page: number, pageSize: number = 10, search: string = '') {
+  const response = await axios.get(API_URL+'/paged', {
+    params: { page, pageSize, search }
+  })
+  return response.data
+}
 export async function getStudentById(id: number): Promise<Student> {
   const response = await axios.get(`${API_URL}/${id}`)
   return response.data

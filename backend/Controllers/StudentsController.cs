@@ -30,7 +30,19 @@ namespace backend.Controllers
             var students = await _repo.GetAllAsync();
             return Ok(students);
         }
-
+        /// <summary>
+        /// GetPaged lista de alunos com paginação
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="search"></param>
+        /// <returns></returns>
+        [HttpGet("paged")]
+        public async Task<ActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string search = "")
+        {
+            var result = await _repo.GetPagedAsync(page, pageSize, search);
+            return Ok(result);
+        }
         /// <summary>
         /// Retorna um aluno específico pelo ID
         /// </summary>

@@ -9,6 +9,7 @@ namespace backend.Data.Repositories.Interfaces
     public interface IStudentRepository
     {
         Task<IEnumerable<Student>> GetAllAsync();
+        Task<object> GetPagedAsync(int page, int pageSize, string search);
         Task<Student?> GetByIdAsync(int id);
         Task<Student?> GetByRAAsync(string ra);
         Task AddAsync(Student student);

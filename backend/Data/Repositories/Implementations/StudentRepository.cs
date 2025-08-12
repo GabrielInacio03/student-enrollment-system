@@ -18,7 +18,34 @@ namespace backend.Data.Repositories.Implementations
 
         public async Task<IEnumerable<Student>> GetAllAsync() =>
             await _context.Students.ToListAsync();
+        public async Task<object> GetPagedAsync(int page, int pageSize, string search)
+        {
+            var query = _context.Students.AsQueryable();
 
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(s =>
+                    s.Name.Contains(search) ||
+                    s.RA.Contains(search) ||
+                    s.CPF.Contains(search));
+            }
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var students = await query
+                .OrderBy(s => s.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new
+            {
+                items = students,
+                totalPages,
+                currentPage = page
+            };
+        }
         public async Task<Student?> GetByIdAsync(int id) =>
             await _context.Students.FindAsync(id);
 
