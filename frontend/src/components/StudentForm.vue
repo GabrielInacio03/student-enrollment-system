@@ -21,6 +21,11 @@
           <button type="button" @click="$emit('close')">❌ Cancelar</button>
         </div>
       </form>
+      <div v-if="errorMessages.length" class="error-box">
+        <ul>
+          <li v-for="(msg, index) in errorMessages" :key="index">{{ msg }}</li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -32,6 +37,9 @@ import { createStudent, updateStudent } from '../services/studentService'
 
 const props = defineProps<{ student: Student | null }>()
 const emit = defineEmits(['close', 'saved'])
+const errorMessages = ref<string[]>([])
+
+
 
 const form = ref<Student>
 ({
@@ -48,15 +56,36 @@ watch(() => props.student, (newVal) => {
     : { id: 0, name: '', email: '', ra: '', cpf: '' }
 }, { immediate: true })
 
+
+
 async function save() {
-  if (form.value.id) {
-    await updateStudent(form.value.id, form.value)
-  } else {
-    await createStudent(form.value)
+  errorMessages.value = []
+  try {
+    if (form.value.id) {
+      await updateStudent(form.value.id, form.value)
+    } else {
+      await createStudent(form.value)
+    }
+    emit('saved')
+    emit('close')
+  } catch (error: any) {
+    const response = error.response?.data
+    errorMessages.value = []
+
+    if (response?.errors && typeof response.errors === 'object') {
+      // Formato padrão do ASP.NET Core
+      const validationErrors = Object.values(response.errors).flat()
+      errorMessages.value = validationErrors as string[]
+    } else if (Array.isArray(response?.erros)) {
+      // Formato customizado com "erros"
+      errorMessages.value = response.erros
+    } else {
+      errorMessages.value = ['Erro inesperado ao salvar aluno.']
+    }
   }
-  emit('saved')
-  emit('close')
 }
+
+
 </script>
 
 <style scoped>
@@ -94,5 +123,13 @@ input {
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
+}
+.error-box {
+  background-color: #ffe0e0;
+  color: #b00020;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #b00020;
 }
 </style>

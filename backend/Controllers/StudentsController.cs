@@ -64,7 +64,9 @@ namespace backend.Controllers
             
             if (_repo.GetByRAAsync(studentDTO.RA).Result != null)
             {
-                return BadRequest(new { Erros = new[] { "RA já cadastrado. Use outro número." } });
+                List<string> errors = new List<string>();
+                errors.Add("RA já cadastrado. Use outro número.");
+                return BadRequest(new { Erros = errors });
             }
             var student = new Student
             {

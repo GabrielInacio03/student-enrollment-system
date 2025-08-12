@@ -24,7 +24,7 @@
           <td>{{ student.cpf }}</td>
           <td>
             <button @click="openForm(student)">✏️ Editar</button>
-            <button @click="deleteStudent(student.id)">🗑️ Excluir</button>
+            <button @click="confirmDelete(student.id)">Excluir</button>
           </td>
         </tr>
         <tr v-if="filteredStudents.length === 0">
@@ -33,19 +33,27 @@
       </tbody>
     </table>
 
-    <!-- Temporariamente removido para evitar erro -->
      <StudentForm
       v-if="showForm"
       :student="selectedStudent"
       @close="closeForm"
       @saved="refreshList"
     />
+     <ConfirmDeleteModal
+        v-if="showDeleteModal"
+        message="Tem certeza que deseja excluir este aluno?"
+        @confirm="deleteStudent"
+        @cancel="showDeleteModal = false"
+      />
   </div>
 </template>
+
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
  import StudentForm from '../components/StudentForm.vue'
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal.vue'
+
 import { getAllStudents, deleteStudentById } from '../services/studentService'
 
 import type { Student } from '../types/Student'
@@ -54,6 +62,9 @@ const students = ref<Student[]>([])
 const search = ref('')
 const showForm = ref(false)
 const selectedStudent = ref<Student | null>(null)
+const showDeleteModal = ref(false)
+const studentToDelete = ref<number | null>(null)
+
 
 const filteredStudents = computed(() =>
   students.value.filter(s =>
@@ -73,9 +84,27 @@ function closeForm() {
   showForm.value = false
 }
 
-async function deleteStudent(id: number) {
-  students.value = students.value.filter(s => s.id !== id)
+function confirmDelete(id: number) {
+  studentToDelete.value = id
+  showDeleteModal.value = true
 }
+
+async function deleteStudent() {
+  if (studentToDelete.value !== null) {
+    try {
+      await deleteStudentById(studentToDelete.value)
+      students.value = students.value.filter(s => s.id !== studentToDelete.value)
+    } catch (error) {
+      console.error('Erro ao excluir aluno:', error)
+      // Aqui você pode exibir um alerta ou toast
+    } finally {
+      studentToDelete.value = null
+      showDeleteModal.value = false
+    }
+  }
+}
+
+
 
 async function refreshList() {
   // Dados mockados para garantir funcionamento
