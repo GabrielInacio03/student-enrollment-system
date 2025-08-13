@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using backend.Data.Repositories.Interfaces;
+using backend.DTOs;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +19,7 @@ namespace backend.Data.Repositories.Implementations
 
         public async Task<IEnumerable<Student>> GetAllAsync() =>
             await _context.Students.ToListAsync();
-        public async Task<object> GetPagedAsync(int page, int pageSize, string search)
+        public async Task<PagedResult<Student>> GetPagedAsync(int page, int pageSize, string search)
         {
             var query = _context.Students.AsQueryable();
 
@@ -31,19 +32,19 @@ namespace backend.Data.Repositories.Implementations
             }
 
             var totalItems = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            var students = await query
-                .OrderBy(s => s.Name)
+            var items = await query
+                .OrderBy(s => s.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            return new
+            return new PagedResult<Student>
             {
-                items = students,
-                totalPages,
-                currentPage = page
+                Items = items,
+                TotalItems = totalItems,
+                Page = page,
+                PageSize = pageSize
             };
         }
         public async Task<Student?> GetByIdAsync(int id) =>
