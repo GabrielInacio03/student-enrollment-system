@@ -38,7 +38,7 @@ namespace backend.Controllers
         /// <param name="search"></param>
         /// <returns></returns>
         [HttpGet("paged")]
-        public async Task<ActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string search = "")
+        public async Task<ActionResult> GetPaged([FromQuery] int page = 10, [FromQuery] int pageSize = 2, [FromQuery] string search = "")
         {
             var result = await _repo.GetPagedAsync(page, pageSize, search);
             return Ok(result);

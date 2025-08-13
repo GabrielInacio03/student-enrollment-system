@@ -1,18 +1,22 @@
 <template>
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-    <h2 class="mb-0">📚 Listagem de Alunos</h2>
-    <div class="d-flex flex-wrap gap-2">
-      <input
-        v-model="search"
-        class="form-control"
-        placeholder="🔍 Digite sua busca"
-      />
-      <button class="btn btn-outline-secondary" @click="search = ''">❌ Limpar</button>
-      <button class="btn btn-primary" @click="openForm()">➕ Cadastrar Aluno</button>
+  <div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <img src="@/assets/images/logtipo.png" alt="Logo" style="max-height: 60px;" />
+        <h2 class="mb-0">📚 Listagem de Alunos</h2>
+      </div>
+      
+      <div class="d-flex flex-wrap gap-2">
+        <input
+          v-model="search"
+          class="form-control"
+          placeholder="🔍 Digite sua busca"
+        />
+        <button class="btn btn-outline-secondary" @click="search = ''">❌ Limpar</button>
+        <button class="btn btn-primary" @click="openForm()">➕ Cadastrar Aluno</button>
+      </div>
     </div>
-  </div>
 
-  <div class="table-responsive">
     <table class="table table-bordered table-hover">
       <thead class="table-primary">
         <tr>
@@ -44,50 +48,48 @@
         </tr>
       </tbody>
     </table>
+
+    <div class="d-flex justify-content-center align-items-center gap-3 mt-3" v-if="totalPages >= 1">
+      <button
+        class="btn btn-outline-primary"
+        @click="refreshList(currentPage - 1)"
+        :disabled="currentPage === 1"
+      >
+        <i class="bi bi-chevron-left"></i> Anterior
+      </button>
+
+      <span class="fw-medium">Página {{ currentPage }} de {{ totalPages }}</span>
+
+      <button
+        class="btn btn-outline-primary"
+        @click="refreshList(currentPage + 1)"
+        :disabled="currentPage === totalPages"
+      >
+        Próxima <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+    <StudentForm
+      v-if="showForm"
+      :student="selectedStudent"
+      @close="closeForm"
+      @saved="refreshList"
+    />
+    <ConfirmDeleteModal
+      v-if="showDeleteModal"
+      message="Tem certeza que deseja excluir este aluno?"
+      @confirm="deleteStudent"
+      @cancel="showDeleteModal = false"
+    />
   </div>
-
-  <div class="d-flex justify-content-center align-items-center gap-3 mt-3" v-if="totalPages >= 1">
-    <button
-      class="btn btn-outline-primary"
-      @click="refreshList(currentPage - 1)"
-      :disabled="currentPage === 1"
-    >
-      <i class="bi bi-chevron-left"></i> Anterior
-    </button>
-
-    <span class="fw-medium">Página {{ currentPage }} de {{ totalPages }}</span>
-
-    <button
-      class="btn btn-outline-primary"
-      @click="refreshList(currentPage + 1)"
-      :disabled="currentPage === totalPages"
-    >
-      Próxima <i class="bi bi-chevron-right"></i>
-    </button>
-  </div>
-
-  <!-- Modais -->
-  <StudentForm
-    v-if="showForm"
-    :student="selectedStudent"
-    @close="closeForm"
-    @saved="refreshList"
-  />
-  <ConfirmDeleteModal
-    v-if="showDeleteModal"
-    message="Tem certeza que deseja excluir este aluno?"
-    @confirm="deleteStudent"
-    @cancel="showDeleteModal = false"
-  />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue'
-import MenuLayout from '@/layouts/MenuLayout.vue'
-import StudentForm from '@/components/StudentForm.vue'
-import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
-import { getStudentsPaged, deleteStudentById } from '@/services/studentService'
-import type { Student } from '@/types/Student'
+import StudentForm from '../components/StudentForm.vue'
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal.vue'
+import { getStudentsPaged, deleteStudentById } from '../services/studentService'
+import type { Student } from '../types/Student'
 
 const students = ref<Student[]>([])
 const search = ref('')
@@ -134,8 +136,8 @@ async function refreshList(page = 1) {
   try {
     const data = await getStudentsPaged(page, pageSize, search.value)
     students.value = Array.isArray(data.items) ? data.items : []
-    totalPages.value = Math.ceil(data.totalItems / data.pageSize)
-    currentPage.value = data.page ?? 1
+    totalPages.value = data.totalPages ?? 1
+    currentPage.value = data.currentPage ?? 1
   } catch (error) {
     console.error('Erro ao buscar alunos:', error)
     students.value = []
@@ -154,5 +156,6 @@ watch(search, () => {
 
 onMounted(() => refreshList())
 </script>
+
 <style scoped>
 </style>

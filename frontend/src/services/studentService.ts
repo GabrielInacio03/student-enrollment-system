@@ -5,7 +5,6 @@ const API_URL = 'http://localhost:5120/api/students'
 
 export async function getAllStudents(): Promise<Student[]> {
   const response = await axios.get(API_URL)
-  console.log("response: ", response)
   return response.data
 }
 export async function getStudentsPaged(page: number, pageSize: number = 10, search: string = '') {

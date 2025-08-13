@@ -2,20 +2,8 @@
   <div class="home">
     <header>
       <h1>🎓 Bem-vindo ao Sistema de Alunos</h1>
-      <p>Veja abaixo os estudantes cadastrados:</p>
     </header>
 
-    <section v-if="students.length > 0">
-      <ul class="student-list">
-        <li v-for="student in students" :key="student.id">
-          <strong>{{ student.name }}</strong> — RA: {{ student.ra }}
-        </li>
-      </ul>
-    </section>
-
-    <section v-else>
-      <p>Nenhum estudante cadastrado ainda.</p>
-    </section>
   </div>
 </template>
 

@@ -1,19 +1,21 @@
 <template>
   <div class="modal-overlay">
-    <div class="modal-content">
-      <p>{{ message }}</p>
-      <div class="modal-actions">
-        <button @click="$emit('confirm')">Sim, excluir</button>
-        <button @click="$emit('cancel')">Cancelar</button>
+    <div class="modal-content bg-white p-4 rounded shadow text-center">
+      <p class="mb-3">{{ message }}</p>
+      <div class="d-flex justify-content-center gap-3">
+        <button class="btn btn-danger" @click="$emit('confirm')">
+          <i class="bi bi-trash"></i> Sim, excluir
+        </button>
+        <button class="btn btn-secondary" @click="$emit('cancel')">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  message: string
-}>()
+defineProps<{ message: string }>()
 </script>
 
 <style scoped>
@@ -27,33 +29,13 @@ defineProps<{
 }
 
 .modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.3s ease;
 }
 
-.modal-actions {
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:first-child {
-  background-color: #e53935;
-  color: white;
-}
-
-button:last-child {
-  background-color: #ccc;
+@keyframes fadeIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 </style>

@@ -3,5 +3,5 @@ import StudentsView from './views/StudentsView.vue'
 </script>
 
 <template>
-  <StudentsView />
+  <router-view />
 </template>

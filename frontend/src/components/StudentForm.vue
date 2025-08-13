@@ -1,37 +1,54 @@
 <template>
   <div class="form-overlay">
-    <div class="form-container">
-      <h3>{{ student?.id ? '✏️ Editar Aluno' : '➕ Cadastrar Aluno' }}</h3>
+    <div class="form-container bg-white p-4 rounded shadow">
+      <h4 class="mb-3">
+        {{ student?.id ? '✏️ Editar Aluno' : '➕ Cadastrar Aluno' }}
+      </h4>
 
       <form @submit.prevent="save">
-        <label>Nome:</label>
-        <input v-model="form.name" required />
+        <div class="mb-3">
+          <label for="name" class="form-label">Nome:</label>
+          <input id="name" v-model="form.name" required class="form-control" />
+        </div>
 
-        <label>Email:</label>
-        <input v-model="form.email" required />
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input id="email" v-model="form.email" required type="email" class="form-control" />
+        </div>
 
-        <label>RA:</label>
-        <input v-model="form.ra" required />
+        <div class="mb-3">
+          <label for="ra" class="form-label">RA:</label>
+          <input id="ra" v-model="form.ra" required class="form-control" />
+        </div>
 
-        <label>CPF:</label>
-        <input v-model="form.cpf" required />
+        <div class="mb-3">
+          <label for="cpf" class="form-label">CPF:</label>
+          <input id="cpf" v-model="form.cpf" required class="form-control" />
+        </div>
 
-        <div class="form-actions">
-          <button type="submit">💾 Salvar</button>
-          <button type="button" @click="$emit('close')">❌ Cancelar</button>
+        <div class="d-flex justify-content-between mt-4">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Salvar
+          </button>
+          <button type="button" class="btn btn-danger" @click="$emit('close')">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
         </div>
       </form>
-      <div v-if="errorMessages.length" class="error-box">
-        <ul>
-          <li v-for="(msg, index) in errorMessages" :key="index">{{ msg }}</li>
-        </ul>
-      </div>
+
+      <transition name="fade">
+        <div v-if="errorMessages.length" class="alert alert-danger mt-4">
+          <ul class="mb-0">
+            <li v-for="(msg, index) in errorMessages" :key="index">{{ msg }}</li>
+          </ul>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import type { Student } from '../types/Student'
 import { createStudent, updateStudent } from '../services/studentService'
 
@@ -39,10 +56,7 @@ const props = defineProps<{ student: Student | null }>()
 const emit = defineEmits(['close', 'saved'])
 const errorMessages = ref<string[]>([])
 
-
-
-const form = ref<Student>
-({
+const form = ref<Student>({
   id: 0,
   name: '',
   email: '',
@@ -55,8 +69,6 @@ watch(() => props.student, (newVal) => {
     ? { ...newVal }
     : { id: 0, name: '', email: '', ra: '', cpf: '' }
 }, { immediate: true })
-
-
 
 async function save() {
   errorMessages.value = []
@@ -73,19 +85,15 @@ async function save() {
     errorMessages.value = []
 
     if (response?.errors && typeof response.errors === 'object') {
-      // Formato padrão do ASP.NET Core
       const validationErrors = Object.values(response.errors).flat()
       errorMessages.value = validationErrors as string[]
     } else if (Array.isArray(response?.erros)) {
-      // Formato customizado com "erros"
       errorMessages.value = response.erros
     } else {
       errorMessages.value = ['Erro inesperado ao salvar aluno.']
     }
   }
 }
-
-
 </script>
 
 <style scoped>
@@ -99,37 +107,26 @@ async function save() {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 999;
 }
 
 .form-container {
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  width: 300px;
-}
-
-label {
-  display: block;
-  margin-top: 0.5rem;
-}
-
-input {
   width: 100%;
-  padding: 0.4rem;
-  margin-bottom: 0.5rem;
+  max-width: 400px;
+  animation: slideIn 0.3s ease;
 }
 
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
-.error-box {
-  background-color: #ffe0e0;
-  color: #b00020;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border-radius: 6px;
-  border: 1px solid #b00020;
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
